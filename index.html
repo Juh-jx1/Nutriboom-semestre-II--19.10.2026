@@ -1,0 +1,1521 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NutriBoom - Transformação e Saúde</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chart.js para gráficos interativos -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --cor-1: #EB7F7F; /* Vermelho/Rosa principal */
+            --cor-2: #EB9A7F;
+            --cor-3: #EAB57F; /* Laranja suave */
+            --cor-4: #EBD07F;
+            --cor-5: #ECEB7F; /* Amarelo claro */
+            
+            --texto-escuro: #4A3B3B;
+            --texto-claro: #ffffff;
+            --bg-card: #ffffff;
+            --bg-input: #fffaf7;
+            --borda: #f0cbb5;
+            --card-shadow: 0 12px 30px rgba(74, 59, 59, 0.08);
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--cor-1) 0%, var(--cor-3) 50%, var(--cor-5) 100%);
+            background-attachment: fixed;
+            color: var(--texto-escuro);
+            font-family: "Roboto", sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .hidden { display: none !important; }
+
+        .titulo-site {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 3.2rem;
+            font-weight: 900;
+            text-align: center;
+            margin: 0 0 12px 0;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            background: linear-gradient(135deg, #c84b4b 0%, var(--cor-1) 50%, #d88c42 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 3px 6px rgba(74, 59, 59, 0.2));
+            transition: transform 0.3s ease;
+        }
+
+        /* Paleta de cor exclusiva para o titulo NUTRIBOOM da tela do Dashboard */
+        #dashboard-section .titulo-site {
+            background: linear-gradient(135deg, #FFFFFF 0%, #FFF3E0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 4px 12px rgba(74, 59, 59, 0.35));
+        }
+
+        .card-container {
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(10px);
+            padding: 40px;
+            border-radius: 24px;
+            width: 100%;
+            max-width: 650px;
+            box-shadow: 0 20px 40px rgba(74, 59, 59, 0.15);
+            margin: 40px 20px;
+            box-sizing: border-box;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+        }
+
+        .card-container h2, .card-container h3 {
+            color: var(--cor-1);
+            text-align: center;
+            margin-top: 0;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 800;
+        }
+
+        p { line-height: 1.6; color: #5a4a4a; }
+
+        .input-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: 700; color: var(--texto-escuro); font-size: 0.95rem; }
+        input, select, textarea {
+            width: 100%;
+            padding: 15px 18px;
+            border-radius: 14px;
+            border: 2px solid var(--borda);
+            background: var(--bg-input);
+            color: var(--texto-escuro);
+            font-size: 1rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-sizing: border-box;
+            font-weight: 500;
+        }
+        input:focus, select:focus {
+            border-color: var(--cor-1);
+            box-shadow: 0 0 0 4px rgba(235, 127, 127, 0.25);
+            background: #ffffff;
+            outline: none;
+        }
+
+        .row-inputs {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-principal {
+            background: linear-gradient(135deg, var(--cor-1) 0%, #e36a6a 100%);
+            color: white;
+            border: none;
+            padding: 16px 24px;
+            font-size: 1.05rem;
+            font-weight: 800;
+            font-family: 'Montserrat', sans-serif;
+            border-radius: 14px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            width: 100%;
+            transition: all 0.25s ease;
+            box-shadow: 0 8px 20px rgba(235, 127, 127, 0.35);
+        }
+        .btn-principal:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(235, 127, 127, 0.45);
+        }
+        .btn-principal:active { transform: translateY(0); }
+        .btn-secundario { 
+            background: linear-gradient(135deg, var(--cor-3) 0%, #d89e5f 100%);
+            box-shadow: 0 8px 20px rgba(234, 181, 127, 0.35);
+        }
+        .btn-secundario:hover { box-shadow: 0 12px 24px rgba(234, 181, 127, 0.45); }
+
+        .alerta-saude {
+            background: #fff8eb;
+            color: #855304;
+            border-left: 5px solid var(--cor-3);
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+            box-shadow: 0 4px 12px rgba(234, 181, 127, 0.15);
+        }
+
+        .dashboard-wrapper {
+            width: 100%;
+            max-width: 950px;
+            margin: 30px 20px 50px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin-bottom: 10px;
+            background: rgba(255, 255, 255, 0.35);
+            backdrop-filter: blur(12px);
+            padding: 10px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .btn-menu {
+            background: rgba(255, 255, 255, 0.9);
+            color: var(--texto-escuro);
+            border: 2px solid transparent;
+            padding: 14px 10px;
+            border-radius: 16px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            font-family: 'Montserrat', sans-serif;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .btn-menu span { font-size: 1.8rem; transition: transform 0.3s ease; }
+        .btn-menu:hover { transform: translateY(-3px); background: #ffffff; border-color: var(--cor-2); }
+        .btn-menu:hover span { transform: scale(1.15); }
+        .btn-menu.ativo { 
+            background: linear-gradient(135deg, var(--cor-1) 0%, #e26767 100%); 
+            color: white; 
+            border-color: transparent;
+            box-shadow: 0 8px 20px rgba(235, 127, 127, 0.4);
+        }
+
+        .conteudo-secao {
+            background: #ffffff;
+            padding: 35px;
+            border-radius: 24px;
+            box-shadow: var(--card-shadow);
+            animation: fadeIn 0.35s ease-out;
+            border: 1px solid rgba(240, 203, 181, 0.3);
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+        .grid-metricas {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin: 25px 0 10px 0;
+        }
+
+        .card-metrica {
+            background: var(--bg-input);
+            border: 2px solid var(--borda);
+            border-radius: 18px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .card-metrica:hover {
+            transform: translateY(-3px);
+            border-color: var(--cor-1);
+            box-shadow: 0 8px 20px rgba(235, 127, 127, 0.15);
+        }
+        .card-metrica .icone-card {
+            font-size: 2rem;
+            margin-bottom: 2px;
+        }
+        .card-metrica .label-metrica {
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #8a7373;
+        }
+        .card-metrica .valor-metrica {
+            font-size: 1.6rem;
+            font-weight: 900;
+            font-family: 'Montserrat', sans-serif;
+            color: var(--cor-1);
+        }
+        .card-metrica .badge-sub {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--texto-escuro);
+            background: #ffffff;
+            padding: 4px 10px;
+            border-radius: 20px;
+            width: fit-content;
+            border: 1px solid var(--borda);
+        }
+
+        /* ESTILOS DOS GRÁFICOS */
+        .container-graficos {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 25px;
+        }
+        .card-grafico {
+            background: var(--bg-input);
+            border: 2px solid var(--borda);
+            border-radius: 20px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .card-grafico h3 {
+            font-size: 1.05rem;
+            margin: 0 0 15px 0;
+            color: var(--texto-escuro);
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 800;
+        }
+        .wrapper-canvas {
+            position: relative;
+            width: 100%;
+            max-height: 250px;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 14px;
+            background: #eee;
+            border-radius: 20px;
+            overflow: hidden;
+            margin: 15px 0 25px 0;
+            border: 1px solid var(--borda);
+        }
+        .progress-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #6bc5ff 0%, #3a9edd 100%);
+            border-radius: 20px;
+            transition: width 0.4s ease;
+        }
+
+        .gamificacao-agua {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(135deg, #fffaf7 0%, #fff4ee 100%);
+            padding: 20px;
+            border-radius: 18px;
+            border: 2px dashed var(--cor-2);
+            margin-bottom: 20px;
+        }
+        .streak-fogo { 
+            font-size: 1.4rem; 
+            font-weight: 900; 
+            font-family: 'Montserrat', sans-serif;
+            color: #ff5e5e; 
+            display: flex; 
+            align-items: center; 
+            gap: 8px;
+            background: #ffffff;
+            padding: 8px 16px;
+            border-radius: 30px;
+            box-shadow: 0 4px 12px rgba(255, 94, 94, 0.15);
+        }
+        
+        .copinhos-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+            justify-content: center;
+            margin-top: 25px;
+        }
+        .copinho {
+            width: 44px; height: 56px;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            filter: grayscale(1) opacity(0.35);
+        }
+        .copinho:hover { transform: scale(1.15); }
+        .copinho.cheio {
+            filter: grayscale(0) opacity(1);
+            transform: scale(1.1);
+        }
+
+        .hero-proteina {
+            background: linear-gradient(135deg, #fffaf7 0%, #ffebe1 100%);
+            padding: 30px 20px;
+            border-radius: 20px;
+            text-align: center;
+            border: 2px solid var(--cor-2);
+            box-shadow: 0 8px 20px rgba(235, 154, 127, 0.15);
+            margin-top: 15px;
+        }
+
+        table { width: 100%; border-collapse: separate; border-spacing: 0 8px; margin-top: 20px; font-size: 0.95rem; }
+        th { padding: 12px 16px; text-align: left; background: var(--cor-2); color: white; font-family: 'Montserrat', sans-serif; font-weight: 700; }
+        th:first-child { border-radius: 12px 0 0 12px; }
+        th:last-child { border-radius: 0 12px 12px 0; }
+        td { padding: 14px 16px; background: var(--bg-input); border-top: 1px solid var(--borda); border-bottom: 1px solid var(--borda); }
+        td:first-child { border-left: 1px solid var(--borda); border-radius: 12px 0 0 12px; }
+        td:last-child { border-right: 1px solid var(--borda); border-radius: 0 12px 12px 0; }
+        
+        .sugestoes-box {
+            background: #fffcf9;
+            border: 2px solid var(--cor-4);
+            padding: 22px;
+            border-radius: 18px;
+            margin-top: 25px;
+        }
+        .sugestoes-box h4 { margin-top: 0; color: #d68936; font-family: 'Montserrat', sans-serif; font-size: 1.1rem; }
+
+        .lista-cards-sugestao {
+            list-style: none;
+            padding: 0;
+            margin: 15px 0 0 0;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .lista-cards-sugestao li {
+            background: #ffffff;
+            padding: 12px 16px;
+            border-radius: 12px;
+            border: 1px solid var(--borda);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+        }
+
+        .toast-notificacao {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            background: #4A3B3B;
+            color: #fff;
+            padding: 14px 22px;
+            border-radius: 14px;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.25);
+            font-size: 0.95rem;
+            font-weight: 600;
+            z-index: 9999;
+            transition: all 0.3s ease;
+            border-left: 6px solid var(--cor-1);
+        }
+
+        .badge-categoria {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .cat-animal { background: #ffe3e3; color: #c84b4b; }
+        .cat-vegetal { background: #e3f7e3; color: #2e7d32; }
+        .cat-laticinio { background: #e3f2fd; color: #1565c0; }
+        .cat-suplemento { background: #f3e5f5; color: #7b1fa2; }
+
+        /* ESTILOS DA SEÇÃO DE GUIA E CALCULO DE MACROS */
+        .card-passo-guia {
+            background: var(--bg-input);
+            border: 2px solid var(--borda);
+            border-radius: 18px;
+            padding: 20px;
+            margin-bottom: 18px;
+            transition: all 0.3s ease;
+        }
+        .card-passo-guia:hover {
+            border-color: var(--cor-2);
+            box-shadow: 0 6px 16px rgba(235, 154, 127, 0.15);
+        }
+        .numero-passo {
+            display: inline-block;
+            background: var(--cor-1);
+            color: white;
+            font-weight: 900;
+            font-family: 'Montserrat', sans-serif;
+            width: 32px;
+            height: 32px;
+            line-height: 32px;
+            text-align: center;
+            border-radius: 50%;
+            margin-right: 10px;
+            font-size: 1rem;
+        }
+        .grid-mao-medida {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 14px;
+            margin-top: 15px;
+        }
+        .card-mao {
+            background: #ffffff;
+            border: 1px solid var(--borda);
+            border-radius: 16px;
+            padding: 16px;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+        }
+        .card-mao .emoji-mao { font-size: 2.2rem; margin-bottom: 8px; display: block; }
+        .card-mao h5 { margin: 0 0 6px 0; color: var(--cor-1); font-family: 'Montserrat', sans-serif; font-size: 1rem; }
+        .card-mao p { margin: 0; font-size: 0.85rem; color: #665; }
+
+        @media (max-width: 768px) {
+            .menu-grid { grid-template-columns: repeat(3, 1fr); }
+            .container-graficos { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 600px) {
+            .titulo-site { font-size: 2.5rem; letter-spacing: 2px; }
+            .card-container { padding: 25px 20px; margin: 20px 12px; }
+            .conteudo-secao { padding: 22px 16px; }
+            .menu-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+            .btn-menu { padding: 10px 6px; font-size: 0.82rem; }
+            .btn-menu span { font-size: 1.5rem; }
+            .row-inputs { flex-direction: column; gap: 0; }
+            .grid-metricas { grid-template-columns: 1fr; }
+            .toast-notificacao { left: 15px; right: 15px; bottom: 15px; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <section id="login-section" class="card-container">
+        <h1 class="titulo-site">NUTRIBOOM</h1>
+        <h2>Acesse seus dados</h2>
+        <div class="input-group">
+            <label for="nomeUsuario">Como podemos te chamar?</label>
+            <input id="nomeUsuario" type="text" placeholder="Digite seu nome">
+        </div>
+        <div class="input-group">
+            <label for="senhaUsuario">Seu email</label>
+            <input id="senhaUsuario" type="password" placeholder="Digite sua senha">
+        </div>
+        <button class="btn-principal" onclick="irParaOnboarding()">Entrar</button>
+    </section>
+
+    <section id="onboarding-section" class="card-container hidden">
+        <h2>Primeiros Passos</h2>
+        <p style="text-align: center;">Para personalizarmos seu dashboard, precisamos de algumas informações básicas.</p>
+        
+        <div class="input-group">
+            <label for="pesoInicial">Seu Peso atual (kg)</label>
+            <input id="pesoInicial" type="number" step="0.1" placeholder="Ex: 75.5">
+        </div>
+        <div class="input-group">
+            <label for="alturaInicial">Sua Altura (m ou cm)</label>
+            <input id="alturaInicial" type="number" step="0.01" placeholder="Ex: 1.75 ou 175">
+        </div>
+
+        <button class="btn-principal btn-secundario" onclick="calcularConfiguracaoInicial()">Analisar meu Perfil</button>
+
+        <div id="resultado-analise" class="hidden" style="margin-top: 25px;">
+            <div id="mensagem-imc" style="font-size: 1.2rem; text-align: center; font-weight: bold; margin-bottom: 15px;"></div>
+            
+            <div id="alerta-medico" class="alerta-saude hidden">
+                ⚠️ <strong>Aviso Importante:</strong> Pelo resultado do seu IMC, aconselhamos que escolha a opção "Emagrecer" para priorizar sua saúde. Recomendamos também consultar um especialista (nutricionista/médico) para acompanhamento adequado.
+            </div>
+
+            <div class="input-group">
+                <label for="objetivoPrincipal">Com base nisso, qual seu objetivo principal?</label>
+                <select id="objetivoPrincipal">
+                    <!-- Dynamic options added via JS -->
+                </select>
+            </div>
+
+            <button class="btn-principal" onclick="finalizarOnboarding()">Ir para o Dashboard</button>
+        </div>
+    </section>
+
+    <section id="dashboard-section" class="dashboard-wrapper hidden">
+        <div style="text-align: center;">
+            <h1 class="titulo-site">NUTRIBOOM</h1>
+            <h2 id="msgBoasVindas" style="color: white; margin-top: 0; font-family: 'Montserrat', sans-serif; font-weight: 700;"></h2>
+            <button class="btn-principal" onclick="sairDaConta()" style="width: auto; padding: 6px 16px; font-size: 0.8rem; margin-bottom: 15px; background: rgba(255,255,255,0.25); border: 1px solid rgba(255,255,255,0.5);">Sair / Limpar Sessão</button>
+        </div>
+
+        <div>
+            <div class="menu-grid">
+                <button class="btn-menu ativo" onclick="abrirAba('aba-resumo', this)"><span>📊</span> Resumo</button>
+                <button class="btn-menu" onclick="abrirAba('aba-guia-macros', this)"><span>🧮</span> Guia & Macros</button>
+                <button class="btn-menu" onclick="abrirAba('aba-proteinas', this)"><span>🥩</span> Proteínas</button>
+                <button class="btn-menu" onclick="abrirAba('aba-agua', this)"><span>💧</span> Água</button>
+                <button class="btn-menu" onclick="abrirAba('aba-alimentacao', this)"><span>🍽️</span> Dieta</button>
+                <button class="btn-menu" onclick="abrirAba('aba-treinos', this)"><span>💪</span> Treinos</button>
+            </div>
+        </div>
+
+        <div id="aba-resumo" class="conteudo-secao">
+            <h2 style="margin-bottom: 5px; color: var(--cor-1);">Seu Perfil & Desempenho</h2>
+            <p style="margin-top: 0; font-size: 0.95rem;">Confira suas métricas corporais e a evolução dos seus dados em gráficos:</p>
+            
+            <div class="grid-metricas">
+                <div class="card-metrica">
+                    <div class="icone-card">⚖️</div>
+                    <div class="label-metrica">Peso Registrado</div>
+                    <div class="valor-metrica"><span id="dash-peso">--</span> <small style="font-size: 1rem;">kg</small></div>
+                </div>
+
+                <div class="card-metrica">
+                    <div class="icone-card">📈</div>
+                    <div class="label-metrica">Índice IMC</div>
+                    <div class="valor-metrica" id="dash-imc">--</div>
+                    <div class="badge-sub" id="dash-classificacao">--</div>
+                </div>
+
+                <div class="card-metrica" style="grid-column: span 1 / -1;">
+                    <div class="icone-card">🎯</div>
+                    <div class="label-metrica">Objetivo Principal</div>
+                    <div class="valor-metrica" style="font-size: 1.4rem;" id="dash-objetivo">--</div>
+                </div>
+            </div>
+
+            <!-- REGISTRO RÁPIDO DE NOVO PESO -->
+            <div style="background: var(--bg-input); border: 2px dashed var(--borda); padding: 18px; border-radius: 18px; margin-top: 20px;">
+                <label style="font-size: 0.9rem; margin-bottom: 10px;">⚡ <strong>Atualizar Peso no Histórico</strong></label>
+                <div class="row-inputs">
+                    <input id="novo-peso-input" type="number" step="0.1" placeholder="Novo peso (kg)" style="flex:1;">
+                    <button class="btn-principal" style="width: auto; padding: 12px 20px;" onclick="registrarNovoPeso()">Atualizar</button>
+                </div>
+            </div>
+
+            <!-- ÁREA DOS GRÁFICOS DO USUÁRIO -->
+            <div class="container-graficos">
+                <div class="card-grafico">
+                    <h3>📈 Evolução do Peso</h3>
+                    <div class="wrapper-canvas">
+                        <canvas id="graficoPeso"></canvas>
+                    </div>
+                </div>
+
+                <div class="card-grafico">
+                    <h3>🥗 Distribuição Nutricional</h3>
+                    <div class="wrapper-canvas">
+                        <canvas id="graficoMacros"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <hr style="border: 0; border-top: 1px solid var(--borda); margin: 25px 0 15px 0;">
+            <p style="font-size: 0.9rem; color: #887373; margin: 0; text-align: center;">
+                💡 Navegue pelas abas acima para registrar sua água, refeições e treinos diariamente!
+            </p>
+        </div>
+
+        <div id="aba-guia-macros" class="conteudo-secao hidden">
+            <h2>🧮 Como Calcular Suas Refeições</h2>
+            <p style="text-align: center; margin-bottom: 25px;">
+                Aprenda de forma simples como descobrir quantas calorias e nutrientes seu corpo precisa diariamente para alcançar o seu objetivo sem neura!
+            </p>
+
+            <!-- CALCULADORA DE MACROS INTERATIVA -->
+            <div style="background: linear-gradient(135deg, #fffaf7 0%, #fff2ec 100%); border: 2px solid var(--cor-2); border-radius: 20px; padding: 25px; margin-bottom: 30px; box-shadow: 0 8px 20px rgba(235, 154, 127, 0.12);">
+                <h3 style="color: var(--cor-1); margin-top: 0; font-family: 'Montserrat', sans-serif; text-align: center;">
+                    ⚡ Calculadora Personalizada de Calorias & Macros
+                </h3>
+                <p style="text-align: center; font-size: 0.9rem; color: #665; margin-bottom: 20px;">
+                    Preencha os detalhes abaixo para calcular sua meta diária de calorias, proteínas, carboidratos e gorduras:
+                </p>
+
+                <div class="row-inputs">
+                    <div class="input-group" style="flex: 1;">
+                        <label for="calc-genero">Gênero Biológico</label>
+                        <select id="calc-genero">
+                            <option value="m">Masculino</option>
+                            <option value="f">Feminino</option>
+                        </select>
+                    </div>
+                    <div class="input-group" style="flex: 1;">
+                        <label for="calc-idade">Sua Idade (anos)</label>
+                        <input id="calc-idade" type="number" placeholder="Ex: 25" value="25">
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="calc-atividade">Nível de Atividade Física Semanal</label>
+                    <select id="calc-atividade">
+                        <option value="1.2">Sedentário (Trabalho sentado, sem exercícios)</option>
+                        <option value="1.375">Pouco Ativo (Treino leve 1 a 3x por semana)</option>
+                        <option value="1.55" selected>Moderadamente Ativo (Treino moderado 3 a 5x por semana)</option>
+                        <option value="1.725">Muito Ativo (Treino pesado 6 a 7x por semana)</option>
+                    </select>
+                </div>
+
+                <button class="btn-principal" onclick="calcularMacrosCompletos()">Calcular Minha Meta Diária</button>
+
+                <!-- RESULTADO DA CALCULADORA -->
+                <div id="resultado-calc-macros" class="hidden" style="margin-top: 25px; border-top: 2px dashed var(--cor-2); padding-top: 20px;">
+                    <div style="text-align: center; margin-bottom: 15px;">
+                        <span style="font-size: 0.85rem; font-weight: 700; color: #8a7373; text-transform: uppercase;">Meta Calórica Recomendada</span>
+                        <div style="font-size: 2.6rem; font-family: 'Montserrat', sans-serif; font-weight: 900; color: var(--cor-1);" id="res-calorias-totais">-- kcal</div>
+                        <small style="color: #665;" id="res-explicacao-tdee">Gasto energéticototal estimado</small>
+                    </div>
+
+                    <div class="grid-metricas" style="margin-top: 15px;">
+                        <div class="card-metrica" style="align-items: center; text-align: center;">
+                            <div class="icone-card">🥩</div>
+                            <div class="label-metrica">Proteínas</div>
+                            <div class="valor-metrica" id="res-g-prot">-- g</div>
+                            <div class="badge-sub" id="res-ratio-prot">-- g/kg</div>
+                        </div>
+
+                        <div class="card-metrica" style="align-items: center; text-align: center;">
+                            <div class="icone-card">🍚</div>
+                            <div class="label-metrica">Carboidratos</div>
+                            <div class="valor-metrica" style="color: #d68936;" id="res-g-carb">-- g</div>
+                            <div class="badge-sub">Energia Diária</div>
+                        </div>
+
+                        <div class="card-metrica" style="align-items: center; text-align: center;">
+                            <div class="icone-card">🥑</div>
+                            <div class="label-metrica">Gorduras Boas</div>
+                            <div class="valor-metrica" style="color: #9e8e2b;" id="res-g-gord">-- g</div>
+                            <div class="badge-sub">Hormônios & Saúde</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PASSO A PASSO EDUCATIVO -->
+            <h3 style="color: var(--cor-1); font-family: 'Montserrat', sans-serif; font-weight: 800; margin-top: 30px;">
+                📚 Entendendo os Passos da Sua Nutrição
+            </h3>
+
+            <div class="card-passo-guia">
+                <h4><span class="numero-passo">1</span> O que são Calorias e como funcionam?</h4>
+                <p>
+                    Calorias são a unidade de energia que seu corpo usa para respirar, caminhar e treinar.
+                </p>
+                <ul style="margin-top: 8px; font-size: 0.95rem; color: #5a4a4a; padding-left: 20px;">
+                    <li><strong>Para Emagrecer:</strong> Você precisa ingerir um pouco menos de calorias do que gasta (<strong>Déficit Calórico</strong>).</li>
+                    <li><strong>Para Ganhar Massa:</strong> Você precisa ingerir um pouco mais do que gasta (<strong>Superávit Calórico</strong>).</li>
+                    <li><strong>Para Manter:</strong> Você consome exatamente o que seu corpo gasta no dia a dia.</li>
+                </ul>
+            </div>
+
+            <div class="card-passo-guia">
+                <h4><span class="numero-passo">2</span> Como calcular as Proteínas do dia?</h4>
+                <p>
+                    A proteína é o tijolo que constrói músculos, gera saciedade e preserva a massa magra. 
+                </p>
+                <p style="font-size: 0.95rem; background: #ffffff; padding: 12px; border-radius: 12px; border: 1px solid var(--borda);">
+                    💡 <strong>Regra prática:</strong> Multiplique seu peso por <strong>1.6g a 2.2g</strong>.<br>
+                    <em>Exemplo:</em> Se você pesa 70kg e deseja emagrecer com saúde: <code>70kg x 2.0g = 140g de proteína no dia</code>. Divida esse total entre 3 e 5 refeições (ex: 35g por refeição).
+                </p>
+            </div>
+
+            <div class="card-passo-guia">
+                <h4><span class="numero-passo">3</span> E Carboidratos e Gorduras?</h4>
+                <p>
+                    • <strong>Gorduras saudáveis:</strong> Mantenha em torno de 0.8g a 1.0g por kg de peso corporal (essenciais para produção hormonal e saúde do cérebro).<br>
+                    • <strong>Carboidratos:</strong> O restante das suas calorias diárias vem dos carboidratos (arroz, batata, aveia, frutas), que são o combustível principal do seu treino.
+                </p>
+            </div>
+
+            <!-- GUIA VISUAL DA MÃO (SEM BALANÇA) -->
+            <div class="sugestoes-box" style="margin-top: 25px;">
+                <h4 style="margin-bottom: 8px;">🤚 Não tem balança de cozinha? Use a Regra da Mão!</h4>
+                <p style="font-size: 0.9rem; color: #5a4a4a; margin-bottom: 15px;">
+                    Uma forma super prática de medir suas refeições visualmente em qualquer lugar sem precisar pesar tudo:
+                </p>
+
+                <div class="grid-mao-medida">
+                    <div class="card-mao">
+                        <span class="emoji-mao">✋</span>
+                        <h5>Palma da Mão</h5>
+                        <p><strong>Proteínas</strong><br>(Frango, Peixe, Carne, Ovos)</p>
+                        <small style="color:#887373;">Aprox. 20g - 30g de proteína por porção</small>
+                    </div>
+
+                    <div class="card-mao">
+                        <span class="emoji-mao">✊</span>
+                        <h5>Punho Fechado</h5>
+                        <p><strong>Carboidratos</strong><br>(Arroz, Batata, Aveia, Frutas)</p>
+                        <small style="color:#887373;">Aprox. 1 porção de energia por refeição</small>
+                    </div>
+
+                    <div class="card-mao">
+                        <span class="emoji-mao">🤲</span>
+                        <h5>Mão em Concha</h5>
+                        <p><strong>Vegetais & Salada</strong><br>(Alface, Brócolis, Cenoura)</p>
+                        <small style="color:#887373;">Fibras, vitaminas e saciedade livre</small>
+                    </div>
+
+                    <div class="card-mao">
+                        <span class="emoji-mao">👍</span>
+                        <h5>Ponta do Polegar</h5>
+                        <p><strong>Gorduras Boas</strong><br>(Azeite, Castanhas, Abacate)</p>
+                        <small style="color:#887373;">Aprox. 1 colher de chá por porção</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="aba-proteinas" class="conteudo-secao hidden">
+            <h2>Meta & Guia de Proteínas</h2>
+            <p style="text-align: center; margin-bottom: 20px;">Com base no seu peso e objetivo, calculamos sua meta diária ideal e selecionamos as melhores fontes nutricionais para o seu plano:</p>
+            
+            <div class="hero-proteina">
+                <div style="font-size: 0.9rem; font-weight: 700; color: #8a7373; text-transform: uppercase; letter-spacing: 1px;">Ingestão Recomendada</div>
+                <h1 style="color: var(--cor-1); margin: 8px 0; font-size: 3rem; font-family: 'Montserrat', sans-serif; font-weight: 900;" id="resultado-proteina-calc">-- g</h1>
+                <p style="margin: 0; font-weight: 600; color: var(--texto-escuro);">de proteína por dia</p>
+            </div>
+            
+            <!-- TABELA DETALHADA SEPARADA POR CATEGORIAS -->
+            <div style="margin-top: 30px;">
+                <h3 style="color: var(--cor-1); font-family: 'Montserrat', sans-serif; font-weight: 800; text-align: left; margin-bottom: 8px;">
+                    🥩 Tabela Nutricional de Fontes Proteicas
+                </h3>
+                <p style="font-size: 0.9rem; margin-bottom: 15px; color: #665;">Consulte os valores por porção para diversificar seu diário de alimentação:</p>
+
+                <div style="overflow-x: auto; border-radius: 14px; border: 1px solid var(--borda);">
+                    <table style="margin-top: 0;">
+                        <thead>
+                            <tr>
+                                <th>Alimento</th>
+                                <th>Categoria</th>
+                                <th>Porção</th>
+                                <th>Proteínas</th>
+                                <th>Calorias</th>
+                                <th>Gorduras</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- ORIGEM ANIMAL -->
+                            <tr>
+                                <td><strong>🍗 Peito de Frango</strong> (grelhado)</td>
+                                <td><span class="badge-categoria cat-animal">Animal</span></td>
+                                <td>100g</td>
+                                <td><strong style="color:var(--cor-1);">31.0 g</strong></td>
+                                <td>165 kcal</td>
+                                <td>3.6 g</td>
+                            </tr>
+                            <tr>
+                                <td><strong>🥩 Patinho Moído</strong> (grelhado)</td>
+                                <td><span class="badge-categoria cat-animal">Animal</span></td>
+                                <td>100g</td>
+                                <td><strong style="color:var(--cor-1);">35.0 g</strong></td>
+                                <td>219 kcal</td>
+                                <td>7.2 g</td>
+                            </tr>
+                            <tr>
+                                <td><strong>🐟 Filé de Tilápia / Peixe Magro</strong></td>
+                                <td><span class="badge-categoria cat-animal">Animal</span></td>
+                                <td>100g</td>
+                                <td><strong style="color:var(--cor-1);">26.0 g</strong></td>
+                                <td>128 kcal</td>
+                                <td>2.7 g</td>
+                            </tr>
+                            <tr>
+                                <td><strong>🥚 Ovo Inteiro</strong> (cozido)</td>
+                                <td><span class="badge-categoria cat-animal">Animal</span></td>
+                                <td>1 unid (50g)</td>
+                                <td><strong style="color:var(--cor-1);">6.3 g</strong></td>
+                                <td>78 kcal</td>
+                                <td>5.3 g</td>
+                            </tr>
+                            <tr>
+                                <td><strong>🍳 Clara de Ovo</strong></td>
+                                <td><span class="badge-categoria cat-animal">Animal</span></td>
+                                <td>1 unid (30g)</td>
+                                <td><strong style="color:var(--cor-1);">3.6 g</strong></td>
+                                <td>17 kcal</td>
+                                <td>0.1 g</td>
+                            </tr>
+                            <tr>
+                                <td><strong>🥩 Lombo Suíno Magro</strong></td>
+                                <td><span class="badge-categoria cat-animal">Animal</span></td>
+                                <td>100g</td>
+                                <td><strong style="color:var(--cor-1);">27.0 g</strong></td>
+                                <td>145 kcal</td>
+                                <td>4.0 g</td>
+                            </tr>
+
+                            <!-- ORIGEM VEGETAL -->
+                            <tr>
+                                <td><strong>🫘 Lentilha Cozida</strong></td>
+                                <td><span class="badge-categoria cat-vegetal">Vegetal</span></td>
+                                <td>100g</td>
+                                <td><strong style="color:var(--cor-1);">9.0 g</strong></td>
+                                <td>116 kcal</td>
+                                <td>0.4 g</td>
+                            </tr>
+                            <tr>
+                                <td><strong>🫛 Grão-de-Bico Cozido</strong></td>
+                                <td><span class="badge-categoria cat-vegetal">Vegetal</span></td>
+                                <td>100g</td>
+                                <td><strong style="color:var(--cor-1);">8.9 g</strong></td>
+                                <td>164 kcal</td>
+                                <td>2.6 g</td>
+                            </tr>
+                            <tr>
+                                <td><strong>🌱 Tofu Firme</strong></td>
+                                <td><span class="badge-categoria cat-vegetal">Vegetal</span></td>
+                                <td>100g</td>
+                                <td><strong style="color:var(--cor-1);">12.0 g</strong></td>
+                                <td>83 kcal</td>
+                                <td>4.8 g</td>
+                            </tr>
+                            <tr>
+                                <td><strong>🫛 Edamame (Soja verde)</strong></td>
+                                <td><span class="badge-categoria cat-vegetal">Vegetal</span></td>
+                                <td>100g</td>
+                                <td><strong style="color:var(--cor-1);">11.0 g</strong></td>
+                                <td>122 kcal</td>
+                                <td>5.2 g</td>
+                            </tr>
+
+                            <!-- LATICÍNIOS -->
+                            <tr>
+                                <td><strong>🥣 Iogurte Grego Natural</strong></td>
+                                <td><span class="badge-categoria cat-laticinio">Laticínio</span></td>
+                                <td>100g</td>
+                                <td><strong style="color:var(--cor-1);">10.0 g</strong></td>
+                                <td>59 kcal</td>
+                                <td>0.4 g</td>
+                            </tr>
+                            <tr>
+                                <td><strong>🧀 Queijo Cottage / Minas Frescal</strong></td>
+                                <td><span class="badge-categoria cat-laticinio">Laticínio</span></td>
+                                <td>100g</td>
+                                <td><strong style="color:var(--cor-1);">12.0 g</strong></td>
+                                <td>98 kcal</td>
+                                <td>4.3 g</td>
+                            </tr>
+
+                            <!-- SUPLEMENTOS -->
+                            <tr>
+                                <td><strong>🥤 Whey Protein Concentrate (80%)</strong></td>
+                                <td><span class="badge-categoria cat-suplemento">Suplemento</span></td>
+                                <td>1 scoop (30g)</td>
+                                <td><strong style="color:var(--cor-1);">24.0 g</strong></td>
+                                <td>120 kcal</td>
+                                <td>1.8 g</td>
+                            </tr>
+                            <tr>
+                                <td><strong>🌱 Proteína Isolada de Ervilha/Soja</strong></td>
+                                <td><span class="badge-categoria cat-suplemento">Suplemento</span></td>
+                                <td>1 scoop (30g)</td>
+                                <td><strong style="color:var(--cor-1);">22.0 g</strong></td>
+                                <td>110 kcal</td>
+                                <td>1.2 g</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="sugestoes-box">
+                <h4>💡 Dica Nutricional de Ouro</h4>
+                <p style="margin: 0; font-size: 0.95rem; color: #5a4a4a; line-height: 1.5;">
+                    Distribuir a proteína em <strong>3 a 5 refeições ao dia</strong> (cerca de 20g a 40g por refeição) otimiza a síntese de massa muscular e mantém a sensação de saciedade por muito mais tempo!
+                </p>
+            </div>
+        </div>
+
+        <div id="aba-agua" class="conteudo-secao hidden">
+            <h2>Desafio da Hidratação</h2>
+            
+            <div class="gamificacao-agua">
+                <div>
+                    <div style="font-size: 0.85rem; font-weight: 700; color: #8a7373; text-transform: uppercase;">Meta Diária</div>
+                    <strong style="font-size: 1.5rem; font-family: 'Montserrat', sans-serif; color: var(--cor-1);"><span id="meta-agua-ml">0</span> ml</strong>
+                </div>
+                <div class="streak-fogo">
+                    🔥 <span id="streak-count">0</span> Dias
+                </div>
+            </div>
+
+            <!-- Visual Progress Bar -->
+            <div style="display: flex; justify-content: space-between; font-weight: 700; font-size: 0.85rem; color: #776;">
+                <span>Progresso Hoje</span>
+                <span id="porcentagem-agua">0%</span>
+            </div>
+            <div class="progress-bar-container">
+                <div id="barra-progresso-agua" class="progress-bar-fill"></div>
+            </div>
+
+            <p style="text-align: center; font-size: 0.95rem; font-weight: 600;">Clique nos copos (250ml) para registrar sua água hoje:</p>
+            
+            <div id="grid-copinhos" class="copinhos-grid">
+                <!-- Copinhos gerados via JS -->
+            </div>
+        </div>
+
+        <div id="aba-alimentacao" class="conteudo-secao hidden">
+            <h2>Diário Alimentar</h2>
+            
+            <div class="input-group">
+                <label for="desc-alimento">O que você comeu?</label>
+                <input id="desc-alimento" type="text" placeholder="Ex: Tapioca com frango desfiado">
+            </div>
+            <div class="row-inputs">
+                <div class="input-group" style="flex: 1;">
+                    <label for="data-alimento">Data</label>
+                    <input id="data-alimento" type="date">
+                </div>
+                <div class="input-group" style="flex: 1;">
+                    <label for="hora-alimento">Hora</label>
+                    <input id="hora-alimento" type="time">
+                </div>
+            </div>
+            <button class="btn-principal btn-secundario" onclick="registrarAlimentacao()">Adicionar Refeição</button>
+            
+            <table id="tabela-alimentos">
+                <thead>
+                    <tr>
+                        <th style="width: 35%;">Data/Hora</th>
+                        <th>Alimento</th>
+                    </tr>
+                </thead>
+                <tbody id="log-alimentos-body"></tbody>
+            </table>
+
+            <div class="sugestoes-box">
+                <h4>💡 Sugestões de Receitas Saudáveis (Gratuitas)</h4>
+                <p style="margin-bottom: 10px;">Baseado no seu objetivo de <strong id="rec-objetivo"></strong>, sugerimos:</p>
+                <ul id="lista-receitas" class="lista-cards-sugestao">
+                    <!-- Preenchido via JS -->
+                </ul>
+            </div>
+        </div>
+
+        <div id="aba-treinos" class="conteudo-secao hidden">
+            <h2>Registro de Treinos</h2>
+            
+            <div class="input-group">
+                <label for="desc-treino">Qual foi o treino?</label>
+                <input id="desc-treino" type="text" placeholder="Ex: Caminhada no parque, Musculação Pernas">
+            </div>
+            
+            <div class="row-inputs">
+                <div class="input-group" style="flex: 1;">
+                    <label for="data-treino">Data</label>
+                    <input id="data-treino" type="date">
+                </div>
+                <div class="input-group" style="flex: 1;">
+                    <label for="hora-treino">Início</label>
+                    <input id="hora-treino" type="time">
+                </div>
+                <div class="input-group" style="flex: 1;">
+                    <label for="minutos-treino">Duração (min)</label>
+                    <input id="minutos-treino" type="number" placeholder="Ex: 45">
+                </div>
+            </div>
+            
+            <button class="btn-principal" onclick="registrarTreino()">Salvar Treino</button>
+            
+            <table id="tabela-treinos">
+                <thead>
+                    <tr>
+                        <th style="width: 30%;">Data / Hora</th>
+                        <th>Atividade</th>
+                        <th style="width: 25%;">Duração</th>
+                    </tr>
+                </thead>
+                <tbody id="log-treinos-body"></tbody>
+            </table>
+
+            <div class="sugestoes-box">
+                <h4>💡 Sugestão de Rotina Semanal</h4>
+                <p style="margin-bottom: 10px;">Se você precisa de uma recomendação para começar:</p>
+                <ul class="lista-cards-sugestao">
+                    <li><strong>Seg/Qua/Sex:</strong> Treino de força (Musculação, Calistenia ou funcional) - 45 min.</li>
+                    <li><strong>Ter/Qui:</strong> Exercício aeróbico (Caminhada rápida, corrida, dança) - 30 a 40 min.</li>
+                    <li><strong>Sáb/Dom:</strong> Descanso ativo (Alongamentos ou caminhada leve).</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Notification Toast Container -->
+    <div id="toast-container" class="toast-notificacao hidden"></div>
+
+    <script>
+        let dadosUsuario = JSON.parse(localStorage.getItem('nutriboom_usuario')) || {
+            nome: "", senha: "", peso: 0, altura: 0, imc: 0, classificacao: "", objetivo: "", multiplicadorProteina: 1.6
+        };
+        let aguaConsumida = parseInt(localStorage.getItem('nutriboom_agua_consumida'), 10) || 0;
+        let streak = parseInt(localStorage.getItem('nutriboom_streak'), 10) || 0;
+        let historicoPeso = JSON.parse(localStorage.getItem('nutriboom_historico_peso')) || [];
+        let logAlimentos = JSON.parse(localStorage.getItem('nutriboom_alimentos')) || [];
+        let logTreinos = JSON.parse(localStorage.getItem('nutriboom_treinos')) || [];
+
+        let chartPesoInstance = null;
+        let chartMacrosInstance = null;
+
+        const hoje = new Date().toISOString().split('T')[0];
+
+        // Verificar sessão ao carregar a página
+        window.onload = function() {
+            if (dadosUsuario && dadosUsuario.nome && dadosUsuario.objetivo) {
+                document.getElementById('login-section').classList.add('hidden');
+                document.getElementById('onboarding-section').classList.add('hidden');
+                document.getElementById('dashboard-section').classList.remove('hidden');
+                prepararDashboard();
+            }
+        };
+
+        function salvarEstadoUsuario() {
+            localStorage.setItem('nutriboom_usuario', JSON.stringify(dadosUsuario));
+        }
+
+        function mostrarMensagem(mensagem) {
+            const toast = document.getElementById('toast-container');
+            toast.innerText = mensagem;
+            toast.classList.remove('hidden');
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3000);
+        }
+
+        function irParaOnboarding() {
+            const nome = document.getElementById('nomeUsuario').value.trim();
+            const senha = document.getElementById('senhaUsuario').value.trim();
+            if(nome === "") { mostrarMensagem("Por favor, informe seu nome."); return; }
+            if(senha === "") { mostrarMensagem("Por favor, informe sua senha."); return; }
+            
+            dadosUsuario.nome = nome;
+            dadosUsuario.senha = senha;
+            salvarEstadoUsuario();
+            
+            document.getElementById('login-section').classList.add('hidden');
+            document.getElementById('onboarding-section').classList.remove('hidden');
+        }
+
+        function calcularConfiguracaoInicial() {
+            const pesoStr = document.getElementById('pesoInicial').value.replace(',', '.');
+            const alturaStr = document.getElementById('alturaInicial').value.replace(',', '.');
+            
+            let peso = parseFloat(pesoStr);
+            let altura = parseFloat(alturaStr);
+
+            if(isNaN(peso) || isNaN(altura) || peso <= 0 || altura <= 0) {
+                mostrarMensagem("Preencha peso e altura com valores válidos."); return;
+            }
+
+            // Converter cm para metros se necessário
+            if (altura > 3) {
+                altura = altura / 100;
+            }
+
+            dadosUsuario.peso = peso;
+            dadosUsuario.altura = altura;
+            
+            const imc = peso / (altura * altura);
+            dadosUsuario.imc = imc.toFixed(1);
+
+            let classificacao = "";
+            let nivelAlerta = false;
+
+            if (imc < 18.5) { classificacao = "Abaixo do peso"; }
+            else if (imc < 25) { classificacao = "Peso Normal"; }
+            else if (imc < 30) { classificacao = "Sobrepeso"; nivelAlerta = true; }
+            else { classificacao = "Obesidade"; nivelAlerta = true; }
+
+            dadosUsuario.classificacao = classificacao;
+            salvarEstadoUsuario();
+
+            document.getElementById('mensagem-imc').innerText = `Seu IMC é ${dadosUsuario.imc} (${classificacao}).`;
+            document.getElementById('resultado-analise').classList.remove('hidden');
+
+            const selectObj = document.getElementById('objetivoPrincipal');
+            selectObj.innerHTML = "";
+
+            if(nivelAlerta) {
+                document.getElementById('alerta-medico').classList.remove('hidden');
+                selectObj.innerHTML += `<option value="emagrecer">Emagrecer (Foco na saúde)</option>`;
+                selectObj.innerHTML += `<option value="manter">Manter Peso (Reeducação Alimentar)</option>`;
+            } else if (imc < 18.5) {
+                document.getElementById('alerta-medico').classList.add('hidden');
+                selectObj.innerHTML += `<option value="ganhar">Ganhar Peso / Massa</option>`;
+                selectObj.innerHTML += `<option value="manter">Manter Peso</option>`;
+            } else {
+                document.getElementById('alerta-medico').classList.add('hidden');
+                selectObj.innerHTML += `<option value="emagrecer">Emagrecer / Definição</option>`;
+                selectObj.innerHTML += `<option value="manter">Manter o Peso</option>`;
+                selectObj.innerHTML += `<option value="ganhar">Ganho de Massa Muscular</option>`;
+            }
+        }
+
+        function finalizarOnboarding() {
+            const obj = document.getElementById('objetivoPrincipal').value;
+            dadosUsuario.objetivo = obj;
+
+            if(obj === 'emagrecer') dadosUsuario.multiplicadorProteina = 2.0;
+            else if(obj === 'ganhar') dadosUsuario.multiplicadorProteina = 2.2;
+            else dadosUsuario.multiplicadorProteina = 1.6;
+
+            salvarEstadoUsuario();
+
+            // Inicializa o histórico de peso se estiver vazio
+            if (historicoPeso.length === 0) {
+                const dataHojeFormat = new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+                historicoPeso.push({ data: dataHojeFormat, peso: dadosUsuario.peso });
+                localStorage.setItem('nutriboom_historico_peso', JSON.stringify(historicoPeso));
+            }
+
+            prepararDashboard();
+
+            document.getElementById('onboarding-section').classList.add('hidden');
+            document.getElementById('dashboard-section').classList.remove('hidden');
+        }
+
+        function prepararDashboard() {
+            document.getElementById('msgBoasVindas').innerText = `Olá, ${dadosUsuario.nome}! 👋`;
+            
+            document.getElementById('dash-peso').innerText = dadosUsuario.peso;
+            document.getElementById('dash-imc').innerText = dadosUsuario.imc;
+            document.getElementById('dash-classificacao').innerText = dadosUsuario.classificacao;
+            document.getElementById('dash-objetivo').innerText = dadosUsuario.objetivo ? dadosUsuario.objetivo.toUpperCase() : '--';
+
+            const protDiaria = dadosUsuario.peso * dadosUsuario.multiplicadorProteina;
+            document.getElementById('resultado-proteina-calc').innerText = `${protDiaria.toFixed(0)} g`;
+
+            configurarAgua();
+            renderizarGraficoPeso();
+            renderizarGraficoMacros();
+            carregarTabelasSalvas();
+
+            document.getElementById('rec-objetivo').innerText = dadosUsuario.objetivo;
+            const listaRec = document.getElementById('lista-receitas');
+            if(dadosUsuario.objetivo === 'emagrecer') {
+                listaRec.innerHTML = `
+                    <li><strong>🍳 Café:</strong> Crepioca leve (1 ovo + 1 colher de goma) com queijo branco.</li>
+                    <li><strong>🥗 Almoço:</strong> Salada colorida com peito de frango grelhado e batata doce cozida.</li>
+                    <li><strong>🍲 Jantar:</strong> Sopa de legumes variados ou omelete de 2 ovos com espinafre.</li>`;
+            } else if (dadosUsuario.objetivo === 'ganhar') {
+                listaRec.innerHTML = `
+                    <li><strong>🥞 Café:</strong> Panqueca de banana (2 ovos, 1 banana, aveia) com pasta de amendoim.</li>
+                    <li><strong>🍛 Almoço:</strong> Arroz integral, feijão, patinho moído e mix de legumes no azeite.</li>
+                    <li><strong>🥤 Lanche:</strong> Iogurte natural com frutas e Whey Protein (ou leite em pó).</li>`;
+            } else {
+                listaRec.innerHTML = `
+                    <li><strong>☕ Café:</strong> Pão integral com ovos mexidos e café puro.</li>
+                    <li><strong>🍽️ Almoço:</strong> Arroz, feijão, carne magra e salada abundante.</li>
+                    <li><strong>🌯 Jantar:</strong> Wrap integral com frango desfiado, alface e tomate.</li>`;
+            }
+
+            document.getElementById('data-alimento').value = hoje;
+            document.getElementById('data-treino').value = hoje;
+        }
+
+        function carregarTabelasSalvas() {
+            const tbodyAlimentos = document.getElementById('log-alimentos-body');
+            tbodyAlimentos.innerHTML = "";
+            logAlimentos.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><strong>${item.data}</strong><br><small style="color:var(--cor-1); font-weight:700;">${item.hora}</small></td>
+                    <td><strong>${item.desc}</strong></td>
+                `;
+                tbodyAlimentos.appendChild(tr);
+            });
+
+            const tbodyTreinos = document.getElementById('log-treinos-body');
+            tbodyTreinos.innerHTML = "";
+            logTreinos.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><strong>${item.data}</strong><br><small style="color:var(--cor-1); font-weight:700;">${item.hora || '--:--'}</small></td>
+                    <td><strong>${item.desc}</strong></td>
+                    <td><span style="background:var(--cor-4); padding:4px 10px; border-radius:10px; font-weight:bold;">${item.min} min</span></td>
+                `;
+                tbodyTreinos.appendChild(tr);
+            });
+        }
+
+        function calcularMacrosCompletos() {
+            const genero = document.getElementById('calc-genero').value;
+            const idade = parseFloat(document.getElementById('calc-idade').value) || 25;
+            const fatorAtividade = parseFloat(document.getElementById('calc-atividade').value) || 1.55;
+            
+            const peso = dadosUsuario.peso || 70;
+            const alturaCm = (dadosUsuario.altura ? dadosUsuario.altura * 100 : 170);
+
+            // Fórmula de Mifflin-St Jeor para Taxa Metabólica Basal (TMB)
+            let tmb = (10 * peso) + (6.25 * alturaCm) - (5 * idade);
+            if (genero === 'm') { tmb += 5; } else { tmb -= 161; }
+
+            // Gasto Energético Total Diário (TDEE)
+            const tdee = tmb * fatorAtividade;
+            let caloriasMeta = tdee;
+
+            // Ajuste conforme o objetivo do usuário
+            if (dadosUsuario.objetivo === 'emagrecer') {
+                caloriasMeta = tdee - 450; // Déficit seguro
+            } else if (dadosUsuario.objetivo === 'ganhar') {
+                caloriasMeta = tdee + 350; // Superávit para hipertrofia
+            }
+
+            // Cálculo dos Macros em Gramas
+            const gProteina = peso * dadosUsuario.multiplicadorProteina;
+            const gGordura = peso * 0.9; // ~0.9g por kg
+            
+            // Calorias consumidas por proteína (4kcal/g) e gordura (9kcal/g)
+            const calProteina = gProteina * 4;
+            const calGordura = gGordura * 9;
+            
+            // Restante das calorias vem de carboidratos (4kcal/g)
+            let calCarb = caloriasMeta - (calProteina + calGordura);
+            if (calCarb < 50) calCarb = 50; // limite mínimo
+            const gCarb = calCarb / 4;
+
+            // Exibição na Tela
+            document.getElementById('res-calorias-totais').innerText = `${Math.round(caloriasMeta)} kcal`;
+            document.getElementById('res-explicacao-tdee').innerText = `Gasto diário estimado: ${Math.round(tdee)} kcal (${dadosUsuario.objetivo.toUpperCase()})`;
+
+            document.getElementById('res-g-prot').innerText = `${Math.round(gProteina)} g`;
+            document.getElementById('res-ratio-prot').innerText = `${dadosUsuario.multiplicadorProteina} g/kg`;
+
+            document.getElementById('res-g-carb').innerText = `${Math.round(gCarb)} g`;
+            document.getElementById('res-g-gord').innerText = `${Math.round(gGordura)} g`;
+
+            document.getElementById('resultado-calc-macros').classList.remove('hidden');
+            mostrarMensagem("🧮 Meta de macros calculada com sucesso!");
+        }
+
+        function renderizarGraficoPeso() {
+            const ctx = document.getElementById('graficoPeso').getContext('2d');
+            
+            const labels = historicoPeso.map(item => item.data);
+            const dataValores = historicoPeso.map(item => item.peso);
+
+            if (chartPesoInstance) { chartPesoInstance.destroy(); }
+
+            chartPesoInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Peso (kg)',
+                        data: dataValores,
+                        borderColor: '#EB7F7F',
+                        backgroundColor: 'rgba(235, 127, 127, 0.15)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.35,
+                        pointBackgroundColor: '#EB7F7F',
+                        pointRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            grid: { color: 'rgba(0,0,0,0.05)' },
+                            ticks: { font: { family: 'Roboto' } }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { font: { family: 'Roboto' } }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderizarGraficoMacros() {
+            const ctx = document.getElementById('graficoMacros').getContext('2d');
+
+            let protPct = 30, carbPct = 40, gordPct = 30;
+            if (dadosUsuario.objetivo === 'emagrecer') {
+                protPct = 40; carbPct = 30; gordPct = 30;
+            } else if (dadosUsuario.objetivo === 'ganhar') {
+                protPct = 30; carbPct = 50; gordPct = 20;
+            }
+
+            if (chartMacrosInstance) { chartMacrosInstance.destroy(); }
+
+            chartMacrosInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Proteínas', 'Carboidratos', 'Gorduras'],
+                    datasets: [{
+                        data: [protPct, carbPct, gordPct],
+                        backgroundColor: ['#EB7F7F', '#EAB57F', '#ECEB7F'],
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { font: { family: 'Roboto', size: 11 } }
+                        }
+                    },
+                    cutout: '65%'
+                }
+            });
+        }
+
+        function registrarNovoPeso() {
+            const inp = document.getElementById('novo-peso-input');
+            const val = parseFloat(inp.value.replace(',', '.'));
+
+            if (isNaN(val) || val <= 0) {
+                mostrarMensagem("Informe um peso válido."); return;
+            }
+
+            dadosUsuario.peso = val;
+            const imc = val / (dadosUsuario.altura * dadosUsuario.altura);
+            dadosUsuario.imc = imc.toFixed(1);
+
+            let classificacao = "";
+            if (imc < 18.5) classificacao = "Abaixo do peso";
+            else if (imc < 25) classificacao = "Peso Normal";
+            else if (imc < 30) classificacao = "Sobrepeso";
+            else classificacao = "Obesidade";
+
+            dadosUsuario.classificacao = classificacao;
+            salvarEstadoUsuario();
+
+            document.getElementById('dash-peso').innerText = val;
+            document.getElementById('dash-imc').innerText = dadosUsuario.imc;
+            document.getElementById('dash-classificacao').innerText = classificacao;
+
+            const dataHojeFormat = new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+            historicoPeso.push({ data: dataHojeFormat, peso: val });
+            localStorage.setItem('nutriboom_historico_peso', JSON.stringify(historicoPeso));
+
+            renderizarGraficoPeso();
+            inp.value = "";
+            mostrarMensagem("📈 Novo peso registrado no gráfico com sucesso!");
+        }
+
+        const svgCopinho = `
+            <svg viewBox="0 0 100 150" xmlns="http://www.w3.org/2000/svg">
+                <path d="M20 20 L80 20 L70 130 L30 130 Z" fill="#6bc5ff" stroke="#333" stroke-width="4"/>
+                <rect x="25" y="40" width="50" height="10" fill="rgba(255,255,255,0.4)"/>
+            </svg>
+        `;
+
+        function configurarAgua() {
+            document.getElementById('streak-count').innerText = streak;
+            const metaMl = dadosUsuario.peso * 35;
+            document.getElementById('meta-agua-ml').innerText = metaMl.toFixed(0);
+            
+            const numCopos = Math.ceil(metaMl / 250);
+            const grid = document.getElementById('grid-copinhos');
+            grid.innerHTML = "";
+
+            for (let i = 1; i <= numCopos; i++) {
+                const copoDiv = document.createElement('div');
+                copoDiv.className = 'copinho';
+                if (i <= aguaConsumida) {
+                    copoDiv.classList.add('cheio');
+                }
+                copoDiv.innerHTML = svgCopinho;
+                copoDiv.onclick = () => alternarCopo(i, numCopos);
+                copoDiv.id = `copo-${i}`;
+                grid.appendChild(copoDiv);
+            }
+
+            atualizarBarraAgua(aguaConsumida, numCopos);
+        }
+
+        function atualizarBarraAgua(cheios, totalCopos) {
+            const pct = Math.round((cheios / totalCopos) * 100) || 0;
+            const barra = document.getElementById('barra-progresso-agua');
+            const txtPct = document.getElementById('porcentagem-agua');
+            if (barra) barra.style.width = `${pct}%`;
+            if (txtPct) txtPct.innerText = `${pct}%`;
+        }
+
+        function alternarCopo(index, totalCopos) {
+            const copo = document.getElementById(`copo-${index}`);
+            const estaCheio = copo.classList.contains('cheio');
+            
+            if (!estaCheio) {
+                for(let i=1; i<=index; i++){ document.getElementById(`copo-${i}`).classList.add('cheio'); }
+            } else {
+                for(let i=index; i<=totalCopos; i++){ document.getElementById(`copo-${i}`).classList.remove('cheio'); }
+            }
+            
+            const cheios = document.querySelectorAll('.copinho.cheio').length;
+            atualizarBarraAgua(cheios, totalCopos);
+
+            if(cheios === totalCopos && aguaConsumida < totalCopos) {
+                streak++;
+                localStorage.setItem('nutriboom_streak', streak);
+                document.getElementById('streak-count').innerText = streak;
+                mostrarMensagem("🎉 Parabéns! Você bateu sua meta de hidratação hoje e sua ofensiva aumentou!");
+            }
+            aguaConsumida = cheios;
+            localStorage.setItem('nutriboom_agua_consumida', aguaConsumida);
+        }
+
+        function registrarAlimentacao() {
+            const desc = document.getElementById('desc-alimento').value.trim();
+            const data = document.getElementById('data-alimento').value;
+            const hora = document.getElementById('hora-alimento').value;
+
+            if(desc === "" || data === "" || hora === "") {
+                mostrarMensagem("Preencha descrição, data e hora."); return;
+            }
+
+            const formatData = data.split('-').reverse().join('/');
+            
+            const novoAlimento = { data: formatData, hora: hora, desc: desc };
+            logAlimentos.unshift(novoAlimento);
+            localStorage.setItem('nutriboom_alimentos', JSON.stringify(logAlimentos));
+            
+            carregarTabelasSalvas();
+            
+            document.getElementById('desc-alimento').value = "";
+            mostrarMensagem("🥗 Refeição registrada com sucesso!");
+        }
+
+        function registrarTreino() {
+            const desc = document.getElementById('desc-treino').value.trim();
+            const data = document.getElementById('data-treino').value;
+            const hora = document.getElementById('hora-treino').value;
+            const min = document.getElementById('minutos-treino').value;
+
+            if(desc === "" || data === "" || min === "") {
+                mostrarMensagem("Preencha todos os campos do treino."); return;
+            }
+
+            const formatData = data.split('-').reverse().join('/');
+            
+            const novoTreino = { data: formatData, hora: hora, desc: desc, min: min };
+            logTreinos.unshift(novoTreino);
+            localStorage.setItem('nutriboom_treinos', JSON.stringify(logTreinos));
+            
+            carregarTabelasSalvas();
+            
+            document.getElementById('desc-treino').value = "";
+            document.getElementById('minutos-treino').value = "";
+            mostrarMensagem("💪 Treino registrado com sucesso!");
+        }
+
+        function abrirAba(idAba, botaoClicado) {
+            const secoes = document.querySelectorAll('.conteudo-secao');
+            secoes.forEach(secao => secao.classList.add('hidden'));
+            
+            const botoes = document.querySelectorAll('.btn-menu');
+            botoes.forEach(btn => btn.classList.remove('ativo'));
+            
+            document.getElementById(idAba).classList.remove('hidden');
+            botaoClicado.classList.add('ativo');
+        }
+
+        function sairDaConta() {
+            localStorage.clear();
+            location.reload();
+        }
+    </script>
+</body>
+</html>
